@@ -1,12 +1,24 @@
-CXX = g++
-CXXFLAGS = -std=c++23
-TARGET = my_program
-SRC = main.cpp
+# Makefile for CUDA project
 
-all: $(TARGET)
+# Compiler
+NVCC := nvcc
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+# Compiler flags
+CFLAGS := -std=c++11
 
+# CUDA flags
+CUDAFLAGS := -lineinfo
+
+# Source files
+SRCS := src/main.cpp src/utils.cpp
+
+# Target executable
+TARGET := cuda_lev
+
+# Build executable
+$(TARGET): $(SRCS)
+	$(NVCC) $(CFLAGS) $(CUDAFLAGS) $^ -o $(TARGET)
+
+# Clean rule
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) cpu_results
