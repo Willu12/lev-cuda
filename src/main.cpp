@@ -5,33 +5,34 @@
 #include <vector>
 #include "utils.hpp"
 
+using namespace std;
 
-std::vector<std::string> cpu_lev(const std::string& word1, const std::string& word2);
-std::vector<std::string> obtain_operations(const std::vector<std::vector<int>>& verif, const std::string& str1, const std::string& str2);
+vector<string> cpu_lev(const string& word1, const string& word2);
+vector<string> obtain_operations(const vector<vector<int>>& verif, const string& str1, const string& str2);
 
 int main(int argc, char** argv) { 
     
-    std::string jeden = read_file("data/jeden.txt");
-    std::string dwa = read_file("data/dwa.txt");
+    string jeden = read_file("data/jeden.txt");
+    string dwa = read_file("data/dwa.txt");
 
-    std::vector<std::string> cpu_edits = cpu_lev(jeden, dwa);
+    vector<string> cpu_edits = cpu_lev(jeden, dwa);
     
     save_edits_to_file(cpu_edits, "cpu_results");
     return 0;
 }
 
-std::vector<std::string> cpu_lev(const std::string& word1, const std::string& word2) {
+vector<string> cpu_lev(const string& word1, const string& word2) {
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = chrono::high_resolution_clock::now();
 
     int size1 = word1.size();
     int size2 = word2.size();
 
-    std::vector<std::vector<int>> verif(size1 + 1, std::vector<int>(size2 + 1));
+    vector<vector<int>> verif(size1 + 1, vector<int>(size2 + 1));
 
     // If one of the words has zero length, the distance is equal to the size of the other word.
     if (size1 == 0 || size2 == 0)
-        return std::vector<std::string>();
+        return vector<string>();
 
     // Sets the first row and the first column of the verification matrix with the numerical order from 0 to the length of each word.
     for (int i = 0; i <= size1; i++)
@@ -50,43 +51,43 @@ std::vector<std::string> cpu_lev(const std::string& word1, const std::string& wo
             // a = the upper adjacent value plus 1: verif[i - 1][j] + 1
             // b = the left adjacent value plus 1: verif[i][j - 1] + 1
             // c = the upper left adjacent value plus the modification cost: verif[i - 1][j - 1] + cost
-            verif[i][j] = std::min(
-                std::min(verif[i - 1][j] + 1, verif[i][j - 1] + 1),
+            verif[i][j] = min(
+                min(verif[i - 1][j] + 1, verif[i][j - 1] + 1),
                 verif[i - 1][j - 1] + cost
             );
         }
     }
 
-    const auto stop = std::chrono::high_resolution_clock::now();
-    const std::chrono::duration<double, std::milli> fp_ms = stop - start;
+    const auto stop = chrono::high_resolution_clock::now();
+    const chrono::duration<double, milli> fp_ms = stop - start;
 
-    std::cout<<"cpu_lev took: " <<fp_ms.count()<<std::endl;
+    cout<<"cpu_lev took: " <<fp_ms.count()<<endl;
 
-    std::vector<std::string> edits = obtain_operations(verif, word1, word2);
+    vector<string> edits = obtain_operations(verif, word1, word2);
 
     return edits;
 }
 
-std::vector<std::string> obtain_operations(const std::vector<std::vector<int>>& verif, const std::string& str1, const std::string& str2) {
+vector<string> obtain_operations(const vector<vector<int>>& verif, const string& str1, const string& str2) {
     
-    std::vector<std::string> list = std::vector<std::string>();
+    vector<string> list = vector<string>();
     unsigned int i = str1.size();
     unsigned int j = str2.size();
 
     while(i > 0 || j > 0) {
         if (i > 0 && verif[i][j] == verif[i - 1][j] + 1) {
-            list.push_back(std::string("Delete "+ std::string(1,str1[i - 1]) + " at position " + std::to_string(i - 1)));
+            list.push_back(string("Delete "+ string(1,str1[i - 1]) + " at position " + to_string(i - 1)));
             i--;
         }
         else if(j > 0 && verif[i][j] == verif[i][j - 1] + 1) {
-            list.push_back(std::string("Insert "+ std::string(1,str2[i - 1]) + " at position " + std::to_string(i - 1)));
+            list.push_back(string("Insert "+ string(1,str2[i - 1]) + " at position " + to_string(i - 1)));
             j--;
         }
         else {
             if(i > 0 && j > 0 && verif[i][j] == verif[i - 1][j - 1] + 1) {
                 if(str1[i - 1] != str2[j - 1]) {
-                    list.push_back(std::string("Substitute "+ std::string(1,str1[i - 1]) + " at position " + std::to_string(i - 1)
-                     + " with " + std::string(1,str2[j - 1])));
+                    list.push_back(string("Substitute "+ string(1,str1[i - 1]) + " at position " + to_string(i - 1)
+                     + " with " + string(1,str2[j - 1])));
                 }   
             }
             i--;
