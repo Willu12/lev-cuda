@@ -1,19 +1,22 @@
 #include "kernels.cuh"
+#include <cstdio>
 
 #define ALPHABET_SIZE 95
 
-__global__ void create_x_matrix(int* x_matrix, char* word, char* alphabet, int size) {
+__global__ void create_x_matrix(int* x_matrix,const char* word,const char* alphabet, int size) {
     int tid = threadIdx.x;
-
+    if(tid >= ALPHABET_SIZE) return;
+    
     for(int j =0; j<size; j++) {
 
-        if(tid == 0 || j == 0) {
+        if(j == 0) {
             x_matrix[tid] = 0;
             continue;
         }
-
+        
+        printf("%d\n",size);
         int index = tid * size + j;
-
+        printf("index = %d, (size + 1) * ALPHABET_SIZE = %d\n",index,(size +1) * ALPHABET_SIZE);
         x_matrix[index] = word[j - 1] == alphabet[tid] ? j : x_matrix[index - 1];
     }
 }
@@ -47,7 +50,8 @@ __global__ void create_d_matrix(int* d_matrix, char* word1, char* word2, int* x_
 
     //okej wywolujemy tyle wątkow ile liter ma slowo 1
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-
+    // wywalmy tidy ktore są za duże
+    if(tid > length -1) return;
     for(int i =0; i<size + 1; i++) {
 
         d_matrix[tid + length * i] = calculate_d_value(d_matrix, word1, word2,x_matrix,tid + length * i,length);
@@ -62,12 +66,15 @@ int* create_X_matrix(char* word, int len) {
     // we assume that word consists only of ascii characters
     int * x_matrix;
     char* alphabet_device;
+    const std::string ALPHABET = std::string(" !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
 
-    cudaMalloc(&x_matrix, sizeof(int) * (1 + len) * ALPHABET.size());
+    cudaError_t cudaStatus;
+
+    cudaStatus = cudaMalloc(&x_matrix, sizeof(int) * (1 + len) * ALPHABET.size());
     cudaMalloc(&alphabet_device, sizeof(char) * ALPHABET.size());
-
-    cudaMemcpy(alphabet_device, ALPHABET.data(), ALPHABET.size(), cudaMemcpyHostToDevice);
-
+    
+    cudaStatus = cudaMemcpy(alphabet_device, ALPHABET.data(), ALPHABET.size() * sizeof(char), cudaMemcpyHostToDevice);
+    
     create_x_matrix<<<1,256>>>(x_matrix,word,alphabet_device,len);
 
 
@@ -79,6 +86,11 @@ int* create_D_matrix(char* word1,char* word2, int len1, int len2,int *x_matrix) 
 
     cudaMalloc(&d_matrix, sizeof(int) * (len1 + 1) * (len2 + 1));
     
+    const int threads_per_blocks = 512;
+
+    const int blocks = len1  / threads_per_blocks + !!(len1 % threads_per_blocks);
+
+    create_d_matrix<<<blocks,threads_per_blocks>>>(d_matrix,word1,word2,x_matrix,len2,len1);
     
 
     return d_matrix;

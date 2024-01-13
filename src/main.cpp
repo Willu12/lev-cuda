@@ -1,8 +1,7 @@
 #include <chrono>
 #include <iostream>
-#include <ostream>
-#include <string>
 #include <vector>
+#include "gpu_lev.hpp"
 #include "utils.hpp"
 
 using namespace std;
@@ -16,8 +15,10 @@ int main(int argc, char** argv) {
     string dwa = read_file("data/dwa.txt");
 
     vector<string> cpu_edits = cpu_lev(jeden, dwa);
+    vector<string> gpu_edits = gpu_lev(jeden, dwa);
     
     save_edits_to_file(cpu_edits, "cpu_results");
+    save_edits_to_file(gpu_edits, "gpu_results");
     return 0;
 }
 
@@ -75,6 +76,8 @@ vector<string> obtain_operations(const vector<vector<int>>& verif, const string&
     unsigned int j = str2.size();
 
     while(i > 0 || j > 0) {
+        printf("%d,%d \n",i,j);
+
         if (i > 0 && verif[i][j] == verif[i - 1][j] + 1) {
             list.push_back(string("Delete "+ string(1,str1[i - 1]) + " at position " + to_string(i - 1)));
             i--;
