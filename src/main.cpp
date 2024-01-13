@@ -76,14 +76,12 @@ vector<string> obtain_operations(const vector<vector<int>>& verif, const string&
     unsigned int j = str2.size();
 
     while(i > 0 || j > 0) {
-        printf("%d,%d \n",i,j);
-
         if (i > 0 && verif[i][j] == verif[i - 1][j] + 1) {
             list.push_back(string("Delete "+ string(1,str1[i - 1]) + " at position " + to_string(i - 1)));
             i--;
         }
         else if(j > 0 && verif[i][j] == verif[i][j - 1] + 1) {
-            list.push_back(string("Insert "+ string(1,str2[i - 1]) + " at position " + to_string(i - 1)));
+            list.push_back(string("Insert "+ string(1,str2[j - 1]) + " at position " + to_string(j - 1)));
             j--;
         }
         else {

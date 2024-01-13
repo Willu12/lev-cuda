@@ -17,7 +17,7 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     cudaMemcpy(word1_device, word1.data(), word1.size(), cudaMemcpyHostToDevice);
     cudaMemcpy(word2_device, word2.data(), word2.size(), cudaMemcpyHostToDevice);
 
-    int* x_matrix = create_X_matrix(word1_device,word1.size());
+    int* x_matrix = create_X_matrix(word2_device,word2.size());
     int* d_matrix = create_D_matrix(word1_device, word2_device, word1.size(), word2.size(),x_matrix);
 
 
@@ -33,13 +33,9 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
 
 vector<string> obtain_operation(const int* verif, const string& str1, const string& str2) {
     vector<string> list = vector<string>();
-    unsigned int i = str1.size() + 1;
-    unsigned int j = str2.size() + 1;
-    const int len = str1.size();
-
-    for(int k =0; k< i * j; k++) {
-        //printf("verif[%d] = %d\n",k,verif[k]);
-    }
+    unsigned int i = str1.size();
+    unsigned int j = str2.size();
+    const int len = str2.size() + 1;
 
     while(i > 0 || j > 0) {
         printf("%d,%d \n",i,j);
@@ -49,7 +45,7 @@ vector<string> obtain_operation(const int* verif, const string& str1, const stri
             printf("jeden\n");
         }
         else if(j > 0 && i>=0 && verif[i * len + j] == verif[i * len + j - 1] + 1) {
-            list.push_back(string("Insert "+ string(1,str2[i - 1]) + " at position " + to_string(i - 1)));
+            list.push_back(string("Insert "+ string(1,str2[j - 1]) + " at position " + to_string(j - 1)));
             j--;
             printf("dwa\n");
         }

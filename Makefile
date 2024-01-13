@@ -21,4 +21,4 @@ $(TARGET): $(SRCS)
 
 # Clean rule
 clean:
-	rm -f $(TARGET) cpu_results
+	rm -f $(TARGET) *_results
