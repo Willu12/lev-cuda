@@ -1,6 +1,8 @@
 #include "gpu_lev.hpp"
 #include "kernels.cuh"
 #include <cstdio>
+#include <cuda_runtime_api.h>
+#include <driver_types.h>
 
 
 using namespace std;
@@ -20,14 +22,10 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     int* x_matrix = create_X_matrix(word2_device,word2.size());
     int* d_matrix = create_D_matrix(word1_device, word2_device, word1.size(), word2.size(),x_matrix);
 
-
     //copy d_matrix on cpu
     int * d_matrix_cpu = (int*)malloc(sizeof(int) * (word1.size() + 1) * (word2.size() + 1));
-
-
     cudaMemcpy(d_matrix_cpu, d_matrix, sizeof(int) * (word1.size() + 1) * (word2.size() + 1), cudaMemcpyDeviceToHost);
-   // printf("%d\n",d_matrix_cpu[word1.size() * (55) +  word2.size() -1]);
-
+    
     return obtain_operation(d_matrix_cpu, word1, word2);
 }
 
@@ -38,16 +36,13 @@ vector<string> obtain_operation(const int* verif, const string& str1, const stri
     const int len = str2.size() + 1;
 
     while(i > 0 || j > 0) {
-        printf("%d,%d \n",i,j);
         if (i > 0 && j>=0 && verif[i * len + j] == verif[(i - 1) * len+ j] + 1) {
             list.push_back(string("Delete "+ string(1,str1[i - 1]) + " at position " + to_string(i - 1)));
             i--;
-            printf("jeden\n");
         }
         else if(j > 0 && i>=0 && verif[i * len + j] == verif[i * len + j - 1] + 1) {
             list.push_back(string("Insert "+ string(1,str2[j - 1]) + " at position " + to_string(j - 1)));
             j--;
-            printf("dwa\n");
         }
         else {
             

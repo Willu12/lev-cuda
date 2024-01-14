@@ -14,10 +14,10 @@ int main(int argc, char** argv) {
     string jeden = read_file("data/jeden.txt");
     string dwa = read_file("data/dwa.txt");
 
-    vector<string> cpu_edits = cpu_lev(jeden, dwa);
+    //vector<string> cpu_edits = cpu_lev(jeden, dwa);
     vector<string> gpu_edits = gpu_lev(jeden, dwa);
     
-    save_edits_to_file(cpu_edits, "cpu_results");
+   // save_edits_to_file(cpu_edits, "cpu_results");
     save_edits_to_file(gpu_edits, "gpu_results");
     return 0;
 }

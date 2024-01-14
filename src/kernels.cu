@@ -19,31 +19,28 @@ __global__ void create_x_matrix(int* x_matrix,const char* word,const char* alpha
 }
 
 __device__ int calculate_d_value(int* d_matrix, char* word1, char* word2, int* x_matrix, int current_index, int length) {
-    
-    length++;
     int i = current_index / length;
     int j = current_index % length;
     
-    //printf("current index =%d, i = %d, j = %d \n",current_index,i,j);
-
     if(i == 0) return j;
     if(j == 0) return i;
 
     if(word1[i - 1] == word2[j - 1]) return d_matrix[current_index - 1 - length];
 
     // wiemy że litera m = word2[i -1] znajduje się na miejscu w alfabecie będącym jej wartością ASCII 
-    int l = word2[j - 1] - 32;
-    
-   
+    int l = word1[i - 1] - 32;
 
     if(x_matrix[l * length + j] == 0) {
-         if(current_index == 11) {
-        printf("f\n");
-    }
         return 1 + min(d_matrix[current_index - length],
-        min(d_matrix[current_index - length - 1],i + j -1));
+        min(d_matrix[current_index - length - 1],i + j - 1));
     }
 
+    int DUPA = 1 + min(
+        d_matrix[current_index - length],
+        min(d_matrix[current_index - length - 1],
+        d_matrix[(i - 1) * length + x_matrix[l * length + j] - 1] + (j - 1 - x_matrix[l * length + j]))
+    );
+ 
     return 1 + min(
         d_matrix[current_index - length],
         min(d_matrix[current_index - length - 1],
@@ -61,7 +58,7 @@ __global__ void create_d_matrix(int* d_matrix, char* word1, char* word2, int* x_
     for(int i =0; i<len + 1; i++) {
 
         int index = tid + i * (correct_length + 1);
-        d_matrix[index] = calculate_d_value(d_matrix, word1, word2,x_matrix,index, correct_length);
+        d_matrix[index] = calculate_d_value(d_matrix, word1, word2,x_matrix,index, correct_length + 1);
         __syncthreads();
     }   
 }
@@ -77,14 +74,12 @@ int* create_X_matrix(char* word, int len) {
 
     cudaError_t cudaStatus;
 
-    printf("MAX=%d\n",(1 + len) * ALPHABET_SIZE);
     cudaStatus = cudaMalloc(&x_matrix, sizeof(int) * (1 + len) * ALPHABET.size());
     cudaMalloc(&alphabet_device, sizeof(char) * ALPHABET.size());
     
     cudaStatus = cudaMemcpy(alphabet_device, ALPHABET.data(), ALPHABET.size() * sizeof(char), cudaMemcpyHostToDevice);
     
     create_x_matrix<<<1,256>>>(x_matrix,word,alphabet_device,len);
-
 
     return x_matrix;
 }
