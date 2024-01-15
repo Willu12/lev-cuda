@@ -48,19 +48,14 @@ __device__ int calculate_d_value(int* d_matrix, char* word1, char* word2, int* x
     );
 }
 
-__global__ void create_d_matrix(int* d_matrix, char* word1, char* word2, int* x_matrix, int len, int correct_length) {
+__global__ void create_d_matrix(int* d_matrix, char* word1, char* word2, int* x_matrix, int len, int correct_length,int i) {
 
     //okej wywolujemy tyle wątkow ile liter ma slowo 1
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     // wywalmy tidy ktore są za duże
     if(tid > correct_length) return;
-
-    for(int i =0; i<len + 1; i++) {
-
-        int index = tid + i * (correct_length + 1);
-        d_matrix[index] = calculate_d_value(d_matrix, word1, word2,x_matrix,index, correct_length + 1);
-        __syncthreads();
-    }   
+    int index = tid + i * (correct_length + 1); 
+     d_matrix[index] = calculate_d_value(d_matrix, word1, word2,x_matrix,index, correct_length + 1);
 }
 
 
@@ -91,9 +86,12 @@ int* create_D_matrix(char* word1,char* word2, int len1, int len2,int *x_matrix) 
     
     const int threads_per_blocks = 512;
 
-    const int blocks = len1  / threads_per_blocks + !!(len1 % threads_per_blocks);
+    const int blocks = (len2 + 1) / threads_per_blocks + !!(len2 % threads_per_blocks);
 
-    create_d_matrix<<<blocks,threads_per_blocks>>>(d_matrix,word1,word2,x_matrix,len1,len2);
+    for(int i =0; i < len1 + 1; i++ ) {
+        
+        create_d_matrix<<<blocks,threads_per_blocks>>>(d_matrix,word1,word2,x_matrix,len1,len2,i);
+    }
     
 
     return d_matrix;

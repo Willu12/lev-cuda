@@ -14,10 +14,10 @@ int main(int argc, char** argv) {
     string jeden = read_file("data/jeden.txt");
     string dwa = read_file("data/dwa.txt");
 
-    //vector<string> cpu_edits = cpu_lev(jeden, dwa);
+    vector<string> cpu_edits = cpu_lev(jeden, dwa);
     vector<string> gpu_edits = gpu_lev(jeden, dwa);
     
-   // save_edits_to_file(cpu_edits, "cpu_results");
+    save_edits_to_file(cpu_edits, "cpu_results");
     save_edits_to_file(gpu_edits, "gpu_results");
     return 0;
 }
@@ -62,7 +62,7 @@ vector<string> cpu_lev(const string& word1, const string& word2) {
     const auto stop = chrono::high_resolution_clock::now();
     const chrono::duration<double, milli> fp_ms = stop - start;
 
-    cout<<"cpu_lev took: " <<fp_ms.count()<<endl;
+    cout<<"cpu_lev took: " <<fp_ms.count()<<" ms"<<endl;
 
     vector<string> edits = obtain_operations(verif, word1, word2);
 

@@ -1,8 +1,8 @@
 #include "gpu_lev.hpp"
 #include "kernels.cuh"
-#include <cstdio>
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
+#include <iostream>
 
 
 using namespace std;
@@ -19,13 +19,27 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     cudaMemcpy(word1_device, word1.data(), word1.size(), cudaMemcpyHostToDevice);
     cudaMemcpy(word2_device, word2.data(), word2.size(), cudaMemcpyHostToDevice);
 
+    cudaEvent_t start_time,stop_time;
+    float time;
+    cudaEventCreate(&start_time);
+    cudaEventCreate(&stop_time);
+    cudaEventRecord(start_time,0);
+
     int* x_matrix = create_X_matrix(word2_device,word2.size());
     int* d_matrix = create_D_matrix(word1_device, word2_device, word1.size(), word2.size(),x_matrix);
+
+
+    cudaEventRecord(stop_time,0);
+    cudaEventSynchronize(stop_time);
+    cudaEventElapsedTime(&time,start_time,stop_time);
+    cudaEventDestroy(start_time);
+    cudaEventDestroy(stop_time);
+    cout<<"gpu levenstein took: "<< time <<" ms\n";
 
     //copy d_matrix on cpu
     int * d_matrix_cpu = (int*)malloc(sizeof(int) * (word1.size() + 1) * (word2.size() + 1));
     cudaMemcpy(d_matrix_cpu, d_matrix, sizeof(int) * (word1.size() + 1) * (word2.size() + 1), cudaMemcpyDeviceToHost);
-    
+
     return obtain_operation(d_matrix_cpu, word1, word2);
 }
 
