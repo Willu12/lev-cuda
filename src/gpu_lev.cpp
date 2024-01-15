@@ -3,6 +3,7 @@
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
 #include <iostream>
+#include <vector>
 
 
 using namespace std;
@@ -28,6 +29,7 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     int* x_matrix = create_X_matrix(word2_device,word2.size());
     int* d_matrix = create_D_matrix(word1_device, word2_device, word1.size(), word2.size(),x_matrix);
 
+    cudaFree(x_matrix);
 
     cudaEventRecord(stop_time,0);
     cudaEventSynchronize(stop_time);
@@ -39,8 +41,14 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     //copy d_matrix on cpu
     int * d_matrix_cpu = (int*)malloc(sizeof(int) * (word1.size() + 1) * (word2.size() + 1));
     cudaMemcpy(d_matrix_cpu, d_matrix, sizeof(int) * (word1.size() + 1) * (word2.size() + 1), cudaMemcpyDeviceToHost);
+    
+    cudaFree(d_matrix);
+    cudaFree(word1_device);
+    cudaFree(word2_device);
 
-    return obtain_operation(d_matrix_cpu, word1, word2);
+    vector<string> operations = obtain_operation(d_matrix_cpu, word1, word2);
+    free(d_matrix_cpu);
+    return operations;
 }
 
 vector<string> obtain_operation(const int* verif, const string& str1, const string& str2) {
@@ -70,6 +78,5 @@ vector<string> obtain_operation(const int* verif, const string& str1, const stri
             j--;
         }
     }
-
     return list;
 }

@@ -34,12 +34,6 @@ __device__ int calculate_d_value(int* d_matrix, char* word1, char* word2, int* x
         return 1 + min(d_matrix[current_index - length],
         min(d_matrix[current_index - length - 1],i + j - 1));
     }
-
-    int DUPA = 1 + min(
-        d_matrix[current_index - length],
-        min(d_matrix[current_index - length - 1],
-        d_matrix[(i - 1) * length + x_matrix[l * length + j] - 1] + (j - 1 - x_matrix[l * length + j]))
-    );
  
     return 1 + min(
         d_matrix[current_index - length],
@@ -89,7 +83,7 @@ int* create_D_matrix(char* word1,char* word2, int len1, int len2,int *x_matrix) 
     const int blocks = (len2 + 1) / threads_per_blocks + !!(len2 % threads_per_blocks);
 
     for(int i =0; i < len1 + 1; i++ ) {
-        
+
         create_d_matrix<<<blocks,threads_per_blocks>>>(d_matrix,word1,word2,x_matrix,len1,len2,i);
     }
     
