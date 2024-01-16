@@ -13,8 +13,8 @@ vector<string> obtain_operations(const vector<vector<int>>& verif, const string&
 int main(int argc, char** argv) { 
     
     // input looks like ./cuda_lev -gc plik1 plik2
-    string jeden;
-    string dwa;
+    string jeden = "data/jeden.txt";
+    string dwa = "data/dwa.txt";
     bool gpu = true;
     bool cpu = false;
 
@@ -43,13 +43,12 @@ int main(int argc, char** argv) {
             return -1;
         }
         
-        jeden = read_file(argv[index]);
-        dwa = read_file(argv[index]);
+        jeden = argv[index];
+        dwa = argv[index + 1];
     }
-    else {
-        jeden = read_file("data/jeden.txt");
-        dwa = read_file("data/dwa.txt");
-    }
+    
+        jeden = read_file(jeden);
+        dwa = read_file(dwa);
 
     if (cpu == true) {
         vector<string> cpu_edits = cpu_lev(jeden, dwa);
