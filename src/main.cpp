@@ -3,6 +3,7 @@
 #include <vector>
 #include "gpu_lev.hpp"
 #include "utils.hpp"
+#include <cstring>
 
 using namespace std;
 
@@ -16,8 +17,6 @@ int main(int argc, char** argv) {
     string dwa;
     bool gpu = true;
     bool cpu = false;
-
-    cout<<argc;
 
     if(argc == 1) {
         jeden = read_file("data/jeden.txt");
