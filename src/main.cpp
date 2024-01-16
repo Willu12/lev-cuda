@@ -17,6 +17,8 @@ int main(int argc, char** argv) {
     bool gpu = true;
     bool cpu = false;
 
+    cout<<argc;
+
     if(argc == 1) {
         jeden = read_file("data/jeden.txt");
         dwa = read_file("data/dwa.txt");
