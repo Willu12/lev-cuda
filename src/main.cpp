@@ -11,14 +11,49 @@ vector<string> obtain_operations(const vector<vector<int>>& verif, const string&
 
 int main(int argc, char** argv) { 
     
-    string jeden = read_file("data/jeden.txt");
-    string dwa = read_file("data/dwa.txt");
+    // input looks like ./cuda_lev -gc plik1 plik2
+    string jeden;
+    string dwa;
+    bool gpu = true;
+    bool cpu = false;
 
-    vector<string> cpu_edits = cpu_lev(jeden, dwa);
-    vector<string> gpu_edits = gpu_lev(jeden, dwa);
-    
-    save_edits_to_file(cpu_edits, "cpu_results");
-    save_edits_to_file(gpu_edits, "gpu_results");
+    if(argc == 1) {
+        jeden = read_file("data/jeden.txt");
+        dwa = read_file("data/dwa.txt");
+    }
+    if(argc > 1 && argv[1][0] == '-') {
+        gpu = false;
+
+        for(int i = 1; i < strlen(argv[1]); i++) {
+            if (argv[1][i] == 'g')  gpu = true;
+            if (argv[1][i] == 'c')  cpu = true;
+
+        }
+        //ensure at least something is running
+        if ((gpu || cpu) == false) gpu = true;
+    }
+
+    if(argc > 2) {
+        int index = 1;
+        if (argv[index][0] == '-') index++;
+
+        if(argc < index + 1) {
+            cout << "Invalid Usage\n";
+            return -1;
+        }
+        
+        jeden = read_file(argv[index]);
+        dwa = read_file(argv[index]);
+    }
+
+    if (cpu == true) {
+        vector<string> cpu_edits = cpu_lev(jeden, dwa);
+        save_edits_to_file(cpu_edits, "cpu_results");
+    }
+    if (gpu == true) {
+        vector<string> gpu_edits = gpu_lev(jeden, dwa);
+        save_edits_to_file(gpu_edits, "gpu_results");
+    }
     return 0;
 }
 
