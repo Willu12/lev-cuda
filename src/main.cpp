@@ -46,6 +46,10 @@ int main(int argc, char** argv) {
         jeden = read_file(argv[index]);
         dwa = read_file(argv[index]);
     }
+    else {
+        jeden = read_file("data/jeden.txt");
+        dwa = read_file("data/dwa.txt");
+    }
 
     if (cpu == true) {
         vector<string> cpu_edits = cpu_lev(jeden, dwa);
