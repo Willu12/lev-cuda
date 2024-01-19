@@ -13,38 +13,71 @@ vector<string> gpu_lev(const string& word1, const string& word2) {
     char* word1_device;
     char* word2_device;
 
+    cudaEvent_t start_time,stop_time;
+    float time, total_time;
+    cudaEventCreate(&start_time);
+    cudaEventCreate(&stop_time);
+
+    cudaEventRecord(start_time,0);
+
     cudaSetDevice(0);
     cudaMalloc(&word1_device, sizeof(char) * word1.size());
     cudaMalloc(&word2_device, sizeof(char) * word2.size());
 
+    cudaEventRecord(stop_time,0);
+    cudaEventSynchronize(stop_time);
+    cudaEventElapsedTime(&time,start_time,stop_time);
+    total_time = time;
+    cout<<"\nallocating memory on cuda took: "<< time <<" ms\n";
+
+    cudaEventRecord(start_time,0);
+
     cudaMemcpy(word1_device, word1.data(), word1.size(), cudaMemcpyHostToDevice);
     cudaMemcpy(word2_device, word2.data(), word2.size(), cudaMemcpyHostToDevice);
 
-    cudaEvent_t start_time,stop_time;
-    float time;
-    cudaEventCreate(&start_time);
-    cudaEventCreate(&stop_time);
+    cudaEventRecord(stop_time,0);
+    cudaEventSynchronize(stop_time);
+    cudaEventElapsedTime(&time,start_time,stop_time);
+    
+    cout<<"copying data from cpu on gpu took: "<< time <<" ms\n";
+    total_time += time;
+
+
     cudaEventRecord(start_time,0);
 
     int* x_matrix = create_X_matrix(word2_device,word2.size());
     int* d_matrix = create_D_matrix(word1_device, word2_device, word1.size(), word2.size(),x_matrix);
+
+
 
     cudaFree(x_matrix);
 
     cudaEventRecord(stop_time,0);
     cudaEventSynchronize(stop_time);
     cudaEventElapsedTime(&time,start_time,stop_time);
-    cudaEventDestroy(start_time);
-    cudaEventDestroy(stop_time);
-    cout<<"gpu levenstein took: "<< time <<" ms\n";
+   
+    cout<<"gpu levenstein algortithm took: "<< time <<" ms\n";
+    total_time +=time;
 
     //copy d_matrix on cpu
+    cudaEventRecord(start_time,0);
+
+
     int * d_matrix_cpu = (int*)malloc(sizeof(int) * (word1.size() + 1) * (word2.size() + 1));
     cudaMemcpy(d_matrix_cpu, d_matrix, sizeof(int) * (word1.size() + 1) * (word2.size() + 1), cudaMemcpyDeviceToHost);
+    cudaEventRecord(stop_time,0);
+    cudaEventSynchronize(stop_time);
+    cudaEventElapsedTime(&time,start_time,stop_time);
+   
+    cout<<"copying data back on cpu took: "<< time <<" ms\n";
+    
+    cout<<"\nTOTAL GPU TIME: " <<total_time + time << "ms\n";
 
     cudaFree(d_matrix);
     cudaFree(word1_device);
     cudaFree(word2_device);
+    cudaEventDestroy(start_time);
+    cudaEventDestroy(stop_time);
 
     vector<string> operations = obtain_operation(d_matrix_cpu, word1, word2);
     free(d_matrix_cpu);

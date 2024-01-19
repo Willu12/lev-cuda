@@ -18,10 +18,6 @@ int main(int argc, char** argv) {
     bool gpu = true;
     bool cpu = false;
 
-    if(argc == 1) {
-        jeden = read_file("data/jeden.txt");
-        dwa = read_file("data/dwa.txt");
-    }
     if(argc > 1 && argv[1][0] == '-') {
         gpu = false;
 

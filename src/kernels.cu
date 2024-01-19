@@ -1,5 +1,6 @@
 #include "kernels.cuh"
 #include <cstdio>
+#include <cuda_runtime_api.h>
 
 #define ALPHABET_SIZE 95
 
@@ -83,7 +84,8 @@ int* create_D_matrix(char* word1,char* word2, int len1, int len2,int *x_matrix) 
     const int blocks = (len2 + 1) / threads_per_blocks + !!(len2 % threads_per_blocks);
 
     for(int i =0; i < len1 + 1; i++ ) {
-
+        
+        cudaDeviceSynchronize();
         create_d_matrix<<<blocks,threads_per_blocks>>>(d_matrix,word1,word2,x_matrix,len1,len2,i);
     }
     
