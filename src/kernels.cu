@@ -1,5 +1,4 @@
 #include "kernels.cuh"
-#include <cstdio>
 #include <cuda_runtime_api.h>
 
 #define ALPHABET_SIZE 95
@@ -57,7 +56,7 @@ __global__ void create_d_matrix(int* d_matrix, char* word1, char* word2, int* x_
 
 int* create_X_matrix(char* word, int len) {
     
-    // we assume that word consists only of ascii characters
+    // slowo sklada sie tylko ze znaków alfabetu ASCII
     int * x_matrix;
     char* alphabet_device;
     const std::string ALPHABET = std::string(" !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");

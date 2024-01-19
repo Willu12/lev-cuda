@@ -12,7 +12,7 @@ vector<string> obtain_operations(const vector<vector<int>>& verif, const string&
 
 int main(int argc, char** argv) { 
     
-    // input looks like ./cuda_lev -gc plik1 plik2
+    // input ./cuda_lev -gc plik1 plik2
     string jeden = "data/jeden.txt";
     string dwa = "data/dwa.txt";
     bool gpu = true;
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
             if (argv[1][i] == 'c')  cpu = true;
 
         }
-        //ensure at least something is running
+        // jak nic nie ustawione to odpalamy na gpu
         if ((gpu || cpu) == false) gpu = true;
     }
 
@@ -66,27 +66,19 @@ vector<string> cpu_lev(const string& word1, const string& word2) {
 
     vector<vector<int>> verif(size1 + 1, vector<int>(size2 + 1));
 
-    // If one of the words has zero length, the distance is equal to the size of the other word.
     if (size1 == 0 || size2 == 0)
         return vector<string>();
 
-    // Sets the first row and the first column of the verification matrix with the numerical order from 0 to the length of each word.
     for (int i = 0; i <= size1; i++)
         verif[i][0] = i;
     for (int j = 0; j <= size2; j++)
         verif[0][j] = j;
 
-    // Verification step / matrix filling.
     for (int i = 1; i <= size1; i++) {
         for (int j = 1; j <= size2; j++) {
-            // Sets the modification cost.
-            // 0 means no modification (i.e. equal letters) and 1 means that a modification is needed (i.e. unequal letters).
+
             int cost = (word2[j - 1] == word1[i - 1]) ? 0 : 1;
 
-            // Sets the current position of the matrix as the minimum value between a (deletion), b (insertion) and c (substitution).
-            // a = the upper adjacent value plus 1: verif[i - 1][j] + 1
-            // b = the left adjacent value plus 1: verif[i][j - 1] + 1
-            // c = the upper left adjacent value plus the modification cost: verif[i - 1][j - 1] + cost
             verif[i][j] = min(
                 min(verif[i - 1][j] + 1, verif[i][j - 1] + 1),
                 verif[i - 1][j - 1] + cost
